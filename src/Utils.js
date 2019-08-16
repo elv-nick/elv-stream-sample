@@ -19,6 +19,44 @@ export const InitializeClient = async (configUrl) => {
   return client;
 };
 
+export const InitializePkClient = async(configUrl, pk, options) => {
+
+  try{
+    //if options not empty, create custom client
+    if(Object.values(options).every(val => (val != ""))){
+      let client = new ElvClient({
+        contentSpaceId: options.space,
+        fabricURIs: [options.fabric],
+        ethereumURIs: [options.ethereum]
+      });
+
+      let wallet = client.GenerateWallet();
+      let signer = wallet.AddAccount({
+        privateKey: pk
+      });
+      client.SetSigner({ signer });
+
+      return client;
+
+    }
+
+    let client = await ElvClient.FromConfigurationUrl({configUrl});
+    let wallet = client.GenerateWallet();
+    let signer = wallet.AddAccount({
+      privateKey: pk
+    });
+    client.SetSigner({signer});
+
+    return client;
+
+  }catch(e){
+    // eslint-disable-next-line no-console
+    console.error(e);
+    return e;
+  }
+};
+
+
 // Check browser capabilities to determine widevine support
 export const AvailableDRMs = async () => {
   const availableDRMs = ["aes-128"];

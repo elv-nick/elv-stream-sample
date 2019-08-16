@@ -5,6 +5,7 @@ import React from "react";
 import {render} from "react-dom";
 import {IconLink, ImageIcon, LoadingElement} from "elv-components-js";
 import Controls from "./components/Controls";
+import Configuration from "./components/Developer.js";
 import {InitializeClient} from "./Utils";
 
 import Logo from "./static/images/Logo.png";
@@ -15,9 +16,11 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
+    /* change this later */
     this.state = {
       client: undefined,
-      version: 0
+      version: 0,
+      showConfiguration: false,
     };
   }
 
@@ -44,6 +47,28 @@ class App extends React.Component {
           this.setState({version: this.state.version + 1});
         }}
       />
+    );
+  }
+
+  ConfigurationSection() {
+    // if(this.state.error) { return null; }
+
+    const toggleButton = (
+      <div
+        onClick={() => this.setState({showConfiguration: !this.state.showConfiguration})}
+        className="toggle-controls"
+      >
+        {this.state.showConfiguration ? "▼ Hide Dev Tools" : "▲ Show Dev Tools"}
+      </div>
+    );
+
+    return (
+      <React.Fragment>
+        { toggleButton }
+        <div className={`configuration ${this.state.showConfiguration ? "" : "hidden"}`}>
+          <Configuration />
+        </div>
+      </React.Fragment>
     );
   }
 
@@ -77,6 +102,9 @@ class App extends React.Component {
           </h1>
         </header>
         <main>
+          <div className="controls-container">
+            { this.ConfigurationSection() }
+          </div>
           { this.App() }
           <div className="advanced-options">
             { this.FabricUrlSelection() }
