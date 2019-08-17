@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import {Action, LoadingElement, Tabs, onEnterPressed, } from "elv-components-js";
 import {InitializeClient, InitializePkClient} from "../Utils";
 
@@ -48,23 +49,27 @@ class Configuration extends React.Component{
       InitializeClient(this.state.bootstrapUrl).then(client =>
       {this.setState({client: client});
       });
+      this.props.callback(client);
     }
     //menomic and custom config
     else if(this.state.showPrivateKey===false && this.state.showBootstrap===false){
       InitializeClient(this.state.bootstrapUrl).then(client =>
       {this.setState({client: client});
       });
+      this.props.callback(client);
     }
     else if(this.state.privateKey !="" && this.state.showBootstrap===true){
       InitializePkClient(this.state.bootstrapUrl, this.state.privateKey, options).then(client =>
       {this.setState({client: client});
       });
+      this.props.callback(client);
     }
     //private key and custom config
     else if(this.state.privateKey !="" && this.state.showBootstrap===false){
       InitializePkClient(this.state.bootstrapUrl, this.state.privateKey, options).then(client =>
       {this.setState({client: client});
       });
+      this.props.callback(client);
     }
     else{
       // console.log("something not set right");
@@ -228,5 +233,10 @@ class Configuration extends React.Component{
     );
   }
 }
+
+Configuration.propTypes = {
+  callback: PropTypes.func.isRequired,
+};
+
 
 export default Configuration;

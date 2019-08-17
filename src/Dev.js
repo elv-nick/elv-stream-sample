@@ -66,7 +66,7 @@ class App extends React.Component {
       <React.Fragment>
         { toggleButton }
         <div className={`configuration ${this.state.showConfiguration ? "" : "hidden"}`}>
-          <Configuration />
+          <Configuration callback = {this.SetClient} />
         </div>
       </React.Fragment>
     );
@@ -80,6 +80,10 @@ class App extends React.Component {
         Source available on GitHub
       </a>
     );
+  }
+
+  SetClient(client){
+      this.setState({client: client})
   }
 
   App() {

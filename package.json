@@ -27,11 +27,16 @@
     ]
   },
   "dependencies": {
+<<<<<<< HEAD
     "@eluvio/elv-client-js": "git+https://github.com/eluv-io/elv-client-js.git#develop",
     "dashjs": "^3.0.0",
+=======
+    "dashjs": "^2.9.3",
+>>>>>>> 67050d8376843916b7bef8db446963ddd2a0448e
     "elv-client-js": "git+https://github.com/eluv-io/elv-client-js.git#develop",
     "elv-components-js": "git+https://github.com/eluv-io/elv-components-js.git#develop",
     "hls.js": "^0.12.4",
+    "mux-embed": "^2.7.1",
     "pre-commit": "^1.2.2",
     "prop-types": "^15.7.2",
     "react": "^16.9.0",

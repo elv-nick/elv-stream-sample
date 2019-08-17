@@ -6,6 +6,7 @@ import DashJS from "dashjs";
 import URI from "urijs";
 import Graph from "./Graph";
 import Segments from "./Segments";
+import Mux from "mux-embed";
 
 class Video extends React.Component {
   constructor(props) {
@@ -28,14 +29,6 @@ class Video extends React.Component {
     this.StopSampling();
   }
 
-  componentDidUpdate(prevProps) {
-    // If sample period has changed, restart interval
-    if(prevProps.samplePeriod !== this.props.samplePeriod) {
-      this.StopSampling();
-      this.StartSampling();
-    }
-  }
-
   InitializeVideo(video) {
     if(!video) { return; }
 
@@ -45,14 +38,22 @@ class Video extends React.Component {
       this.InitializeHLS(video, playoutUrl) :
       this.InitializeDash(video, playoutUrl);
 
+    this.InitializeMux(player);
+
     this.setState({
       initialTime: performance.now(),
       player,
       video
     }, this.StartSampling);
 
-    // Stop sampling when video has ended
-    video.addEventListener("ended", this.StopSampling);
+    video.addEventListener("ended", () => {
+      // Stop sampling when video has ended
+      this.StopSampling();
+
+      if(this.props.onMediaEnded) {
+        this.props.onMediaEnded();
+      }
+    });
   }
 
   InitializeHLS(video, playoutUrl) {
@@ -161,6 +162,28 @@ class Video extends React.Component {
     return player;
   }
 
+  InitializeMux(player) {
+    const options = {
+      debug: false,
+      data: {
+        env_key: "2i5480sms8vdgj0sv9bv6lpk5",
+        video_id: this.props.versionHash,
+        video_title: this.props.metadata.name
+      }
+    };
+
+    if(this.props.protocol === "hls") {
+      options.hlsjs = player;
+      options.Hls = HLSPlayer;
+      options.data.player_name = "stream-sample-hls";
+    } else {
+      options.dashjs = player;
+      options.data.player_name = "stream-sample-dash";
+    }
+
+    Mux.monitor("video", options);
+  }
+
   // Discard old samples that are no longer visible
   TrimSamples() {
     // Max visible samples is 300 seconds times 4 samples per second
@@ -187,6 +210,8 @@ class Video extends React.Component {
   }
 
   StartSampling() {
+    const samplePeriod = 250;
+
     if(this.props.protocol === "hls") {
       this.metricsInterval = setInterval(() => {
         const currentTime = (performance.now() - this.state.initialTime) / 1000;
@@ -209,7 +234,7 @@ class Video extends React.Component {
         });
 
         this.TrimSamples();
-      }, this.props.samplePeriod);
+      }, samplePeriod);
     } else {
       this.metricsInterval = setInterval(() => {
         const currentTime = (performance.now() - this.state.initialTime) / 1000;
@@ -229,7 +254,7 @@ class Video extends React.Component {
         });
 
         this.TrimSamples();
-      }, this.props.samplePeriod);
+      }, samplePeriod);
     }
   }
 
@@ -270,7 +295,8 @@ Video.propTypes = {
   posterUrl: PropTypes.string,
   protocol: PropTypes.string.isRequired,
   sampleWindow: PropTypes.number.isRequired,
-  samplePeriod: PropTypes.number.isRequired
+  versionHash: PropTypes.string.isRequired,
+  onMediaEnded: PropTypes.func
 };
 
 export default Video;
